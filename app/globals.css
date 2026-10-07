@@ -43,7 +43,7 @@
 }
 
 @theme {
-  /* Type scale: five steps plus display. Fluid between small mobile and 4K. */
+  /* Type scale: five steps plus display and chapter. Fluid between small mobile and 4K. */
   --text-meta: 0.75rem;
   --text-meta--line-height: 1.4;
   --text-small: 0.875rem;
@@ -56,6 +56,9 @@
   --text-title--line-height: 0.95;
   --text-display: clamp(3.5rem, 0.5rem + 15vw, 18rem);
   --text-display--line-height: 0.86;
+  /* Chapter: sized so the longest single word (13 capitals) always fits one line. */
+  --text-chapter: clamp(2rem, 0.25rem + 8.5vw, 14rem);
+  --text-chapter--line-height: 0.9;
 }
 
 /* Tokens Tailwind has no namespace for */
@@ -68,6 +71,10 @@
   --duration-fast: 160ms;
   --duration-base: 320ms;
   --duration-slow: 640ms;
+  --duration-reveal: 800ms;
+
+  /* Delay added per staggered item inside a scroll reveal */
+  --reveal-step: 90ms;
 
   /* z-index layers */
   --z-base: 0;
@@ -95,6 +102,18 @@
    ========================================================================== */
 
 @layer base {
+  /* Surface-aware tones. Components read these instead of picking a colour, so
+     the same markup works on paper and on ink. */
+  :root {
+    --tone-secondary: var(--color-ink-muted);
+    --rule-color: var(--color-dust);
+  }
+
+  [data-surface="ink"] {
+    --tone-secondary: var(--color-dust);
+    --rule-color: color-mix(in srgb, var(--color-dust) 35%, transparent);
+  }
+
   html {
     background-color: var(--color-paper);
     color: var(--color-ink);
@@ -202,6 +221,16 @@
   font-weight: 500;
 }
 
+/* Section-statement scale. Same voice as display, sized to hold long words. */
+@utility type-chapter {
+  font-family: var(--font-sans);
+  font-size: var(--text-chapter);
+  line-height: var(--text-chapter--line-height);
+  letter-spacing: -0.045em;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
 /* Tiny technical metadata. Mono is reserved for this role. */
 @utility type-meta {
   font-family: var(--font-mono);
@@ -292,6 +321,53 @@
   .line__inner {
     display: block;
     animation: line-up 800ms var(--ease-out-quint) var(--enter-delay, 0s) both;
+  }
+
+  /* ---- Scroll reveals ----
+     Visible by default (no JavaScript, reduced motion, already in view).
+     RevealObserver marks a [data-reveal] container data-state="hidden" while it
+     is below the fold, then "shown" as it enters. Three deliberately different
+     effects, used on elements inside that container:
+       reveal-line  masked rise (put inside a .line wrapper)
+       reveal-rule  hairline draws from the left
+       reveal-fade  opacity only, no movement
+     Stagger with --i (index) and --reveal-delay (seconds) on the element.
+     Never nest one [data-reveal] container inside another. */
+
+  .reveal-line {
+    display: block;
+  }
+
+  .reveal-rule {
+    display: block;
+    transform-origin: left;
+  }
+
+  [data-reveal][data-state="hidden"] .reveal-line {
+    transform: translateY(105%);
+  }
+
+  [data-reveal][data-state="hidden"] .reveal-rule {
+    transform: scaleX(0);
+  }
+
+  [data-reveal][data-state="hidden"] .reveal-fade {
+    opacity: 0;
+  }
+
+  [data-reveal][data-state="shown"] .reveal-line {
+    transition: transform var(--duration-reveal) var(--ease-out-quint)
+      calc(var(--reveal-delay, 0s) + var(--i, 0) * var(--reveal-step));
+  }
+
+  [data-reveal][data-state="shown"] .reveal-rule {
+    transition: transform var(--duration-reveal) var(--ease-in-out-quart)
+      calc(var(--reveal-delay, 0s) + var(--i, 0) * var(--reveal-step));
+  }
+
+  [data-reveal][data-state="shown"] .reveal-fade {
+    transition: opacity var(--duration-slow) var(--ease-out-quint)
+      calc(var(--reveal-delay, 0s) + var(--i, 0) * var(--reveal-step));
   }
 
   /* ---- Navigation ---- */
