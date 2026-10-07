@@ -1,0 +1,488 @@
+@import "tailwindcss";
+
+/* ==========================================================================
+   DESIGN TOKENS
+   Every colour, type size, space, radius, easing, breakpoint and z-index lives
+   here. Components must reference tokens, never raw values.
+   ========================================================================== */
+
+@theme {
+  /* Breakpoints: base = small mobile */
+  --breakpoint-sm: 30rem;   /* large mobile   ~480px  */
+  --breakpoint-md: 48rem;   /* tablet         ~768px  */
+  --breakpoint-lg: 64rem;   /* laptop         ~1024px */
+  --breakpoint-xl: 90rem;   /* desktop        ~1440px */
+  --breakpoint-2xl: 120rem; /* large desktop  ~1920px */
+
+  /* Colour: brief palette */
+  --color-paper: #e8e4d8;
+  --color-ink: #171717;
+  --color-dust: #b8b5aa;
+  --color-signal: #ff4d2e;
+  --color-warning: #d9ff00;
+
+  /* Colour: derived for accessibility (see notes below) */
+  --color-ink-muted: #5c5a52; /* secondary TEXT on paper, 5.4:1 */
+  --color-signal-text: #b3290f; /* signal as TEXT on paper, 5.1:1 */
+
+  /* Radii: the system is square; hairline only (round is for the cursor dot) */
+  --radius-none: 0;
+  --radius-hairline: 2px;
+  --radius-round: 9999px;
+
+  /* Easing */
+  --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out-quart: cubic-bezier(0.76, 0, 0.24, 1);
+}
+
+@theme inline {
+  /* Font stacks reference the next/font variables set in layout.tsx */
+  --font-display: var(--font-display-face), "Times New Roman", Times, serif;
+  --font-sans: var(--font-sans-face), system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: var(--font-mono-face), ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+}
+
+@theme {
+  /* Type scale: five steps plus display. Fluid between small mobile and 4K. */
+  --text-meta: 0.75rem;
+  --text-meta--line-height: 1.4;
+  --text-small: 0.875rem;
+  --text-small--line-height: 1.5;
+  --text-body: clamp(1rem, 0.95rem + 0.25vw, 1.1875rem);
+  --text-body--line-height: 1.55;
+  --text-lead: clamp(1.25rem, 1rem + 1vw, 1.875rem);
+  --text-lead--line-height: 1.3;
+  --text-title: clamp(2.25rem, 1.2rem + 4.5vw, 6rem);
+  --text-title--line-height: 0.95;
+  --text-display: clamp(3.5rem, 0.5rem + 15vw, 18rem);
+  --text-display--line-height: 0.86;
+}
+
+/* Tokens Tailwind has no namespace for */
+:root {
+  --gutter: clamp(1rem, 3.5vw, 3rem);
+  --section-space: clamp(6rem, 14vw, 14rem);
+  --page-max: 120rem;
+  --nav-height: 3.5rem;
+
+  --duration-fast: 160ms;
+  --duration-base: 320ms;
+  --duration-slow: 640ms;
+
+  /* z-index layers */
+  --z-base: 0;
+  --z-content: 10;
+  --z-nav: 50;
+  --z-overlay: 100;
+  --z-cursor: 200;
+  --z-skip: 300;
+}
+
+/* ==========================================================================
+   ACCESSIBILITY NOTE ON THE BRIEF PALETTE (measured against PAPER #E8E4D8)
+     INK     #171717  14.1:1  all text
+     DUST    #B8B5AA   1.6:1  FAILS for text. Hairlines, rules, dividers only.
+                              (On INK it is ~8:1 and is fine for text there.)
+     SIGNAL  #FF4D2E   2.6:1  FAILS for text and for meaningful UI. Pair with
+                              ink text, or use as a decorative marker next to
+                              real text. On INK it is 5.4:1 and passes.
+     WARNING #D9FF00   1.1:1  Only ever on INK. Never on PAPER.
+   Use ink-muted for secondary text and signal-text for signal-coloured text.
+   ========================================================================== */
+
+/* ==========================================================================
+   BASE
+   ========================================================================== */
+
+@layer base {
+  html {
+    background-color: var(--color-paper);
+    color: var(--color-ink);
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    scroll-padding-top: 5rem;
+  }
+
+  body {
+    min-height: 100svh;
+    overflow-x: clip;
+    font-family: var(--font-sans);
+    font-size: var(--text-body);
+    line-height: var(--text-body--line-height);
+    font-kerning: normal;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-weight: 400;
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  img,
+  svg,
+  video,
+  canvas {
+    display: block;
+    max-width: 100%;
+  }
+
+  button,
+  input,
+  textarea,
+  select {
+    font: inherit;
+    color: inherit;
+  }
+
+  ::selection {
+    background-color: var(--color-signal);
+    color: var(--color-ink);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-ink);
+    outline-offset: 3px;
+  }
+
+  /* Surfaces that switch to ink invert the focus ring */
+  [data-surface="ink"] :focus-visible {
+    outline-color: var(--color-paper);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-delay: 0s !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      transition-delay: 0s !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+/* ==========================================================================
+   TYPE ROLES
+   ========================================================================== */
+
+/* Large editorial statements. Serif, tight, quiet. */
+@utility type-editorial {
+  font-family: var(--font-display);
+  font-size: var(--text-title);
+  line-height: var(--text-title--line-height);
+  letter-spacing: -0.02em;
+}
+
+/* Hero scale. Sans, extreme size, tight leading. */
+@utility type-display {
+  font-family: var(--font-sans);
+  font-size: var(--text-display);
+  line-height: var(--text-display--line-height);
+  letter-spacing: -0.045em;
+  font-weight: 500;
+}
+
+/* Tiny technical metadata. Mono is reserved for this role. */
+@utility type-meta {
+  font-family: var(--font-mono);
+  font-size: var(--text-meta);
+  line-height: var(--text-meta--line-height);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* ==========================================================================
+   MOTION PRIMITIVES
+   Transform and opacity only. Delay comes from --enter-delay.
+   ========================================================================== */
+
+@keyframes enter-up {
+  from {
+    opacity: 0;
+    transform: translateY(0.75rem);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes line-up {
+  from {
+    transform: translateY(105%);
+  }
+  to {
+    transform: none;
+  }
+}
+
+/* ==========================================================================
+   COMPONENTS
+   ========================================================================== */
+
+@layer components {
+  .skip-link {
+    position: fixed;
+    top: 0.75rem;
+    left: 0.75rem;
+    z-index: var(--z-skip);
+    padding: 0.75rem 1rem;
+    background-color: var(--color-ink);
+    color: var(--color-paper);
+    font-family: var(--font-mono);
+    font-size: var(--text-meta);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    transform: translateY(-200%);
+  }
+
+  .skip-link:focus-visible {
+    transform: translateY(0);
+    outline-color: var(--color-signal);
+  }
+
+  /* ---- Entrance helpers ---- */
+
+  .enter {
+    animation: enter-up var(--duration-slow) var(--ease-out-quint) var(--enter-delay, 0s) both;
+  }
+
+  .fade-in {
+    animation: fade-in var(--duration-base) linear var(--enter-delay, 0s) both;
+  }
+
+  /* Masked line: the inner span rises out of a clipped wrapper. The padding /
+     negative margin pair keeps glyph edges from being cut by the clip. */
+  .line {
+    display: block;
+    overflow: clip;
+    padding: 0.08em 0.05em;
+    margin: -0.08em -0.05em;
+  }
+
+  .line__inner {
+    display: block;
+    animation: line-up 800ms var(--ease-out-quint) var(--enter-delay, 0s) both;
+  }
+
+  /* ---- Navigation ---- */
+
+  .site-header {
+    position: fixed;
+    inset: 0 0 auto 0;
+    z-index: var(--z-nav);
+    height: var(--nav-height);
+    background-color: var(--color-paper);
+    border-bottom: 1px solid var(--color-dust);
+  }
+
+  .site-header__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 100%;
+    max-width: var(--page-max);
+    margin-inline: auto;
+    padding-inline: var(--gutter);
+  }
+
+  .nav-link {
+    position: relative;
+    display: inline-block;
+    padding-block: 0.5rem;
+    font-size: var(--text-small);
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .nav-link::after {
+    content: "";
+    position: absolute;
+    right: 0;
+    bottom: 0.25rem;
+    left: 0;
+    height: 1px;
+    background-color: currentColor;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform var(--duration-base) var(--ease-out-quint);
+  }
+
+  .nav-link:hover::after,
+  .nav-link:focus-visible::after {
+    transform: scaleX(1);
+  }
+
+  /* ---- Mobile menu ---- */
+
+  .menu-button {
+    position: relative;
+    z-index: calc(var(--z-overlay) + 1);
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+    padding: 0 0 0 1rem;
+    background: none;
+    border: 0;
+    font-size: var(--text-small);
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-align: right;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: color var(--duration-base) linear;
+  }
+
+  .menu-button[data-open="true"] {
+    color: var(--color-paper);
+  }
+
+  .menu-button[data-open="true"]:focus-visible {
+    outline-color: var(--color-paper);
+  }
+
+  .menu-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-overlay);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 2rem;
+    padding: calc(var(--nav-height) + var(--gutter)) var(--gutter) var(--gutter);
+    background-color: var(--color-ink);
+    color: var(--color-paper);
+    overflow-y: auto;
+    clip-path: inset(0 0 100% 0);
+    visibility: hidden;
+    transition:
+      clip-path var(--duration-slow) var(--ease-in-out-quart),
+      visibility 0s linear var(--duration-slow);
+  }
+
+  .menu-overlay[data-open="true"] {
+    clip-path: inset(0);
+    visibility: visible;
+    transition:
+      clip-path var(--duration-slow) var(--ease-in-out-quart),
+      visibility 0s;
+  }
+
+  .menu-link {
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+    min-height: 4rem;
+    padding-block: 0.5rem;
+    border-top: 1px solid color-mix(in srgb, var(--color-dust) 35%, transparent);
+    font-size: clamp(2.75rem, 14vw, 5rem);
+    font-weight: 500;
+    line-height: 0.95;
+    letter-spacing: -0.04em;
+    text-transform: uppercase;
+    opacity: 0;
+    transform: translateY(1.5rem);
+    transition:
+      transform var(--duration-slow) var(--ease-out-quint),
+      opacity var(--duration-base) linear;
+  }
+
+  .menu-overlay[data-open="true"] .menu-link {
+    opacity: 1;
+    transform: none;
+    transition-delay: calc(var(--i, 0) * 60ms + 200ms);
+  }
+
+  .menu-link__index {
+    flex: none;
+    min-width: 2ch;
+    color: var(--color-dust);
+    letter-spacing: 0.06em;
+  }
+
+  /* ---- Cursor (desktop, fine pointer, motion allowed) ---- */
+
+  .cursor {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: var(--z-cursor);
+    color: var(--color-paper);
+    mix-blend-mode: difference;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity var(--duration-fast) linear;
+    will-change: transform;
+  }
+
+  .cursor[data-visible="true"] {
+    opacity: 1;
+  }
+
+  .cursor__dot {
+    display: block;
+    width: 0.5rem;
+    height: 0.5rem;
+    margin: -0.25rem 0 0 -0.25rem;
+    border-radius: var(--radius-round);
+    background-color: currentColor;
+    transition: transform var(--duration-base) var(--ease-out-quint);
+  }
+
+  .cursor[data-state="interactive"] .cursor__dot {
+    transform: scale(3);
+  }
+
+  .cursor__label {
+    position: absolute;
+    top: 0;
+    left: 1.5rem;
+    white-space: nowrap;
+    transform: translateY(-50%);
+  }
+
+  .cursor__label:empty {
+    display: none;
+  }
+
+  @media (hover: none), (pointer: coarse), (prefers-reduced-motion: reduce) {
+    .cursor {
+      display: none;
+    }
+  }
+
+  /* Native cursor is hidden only after a real mouse has moved. */
+  .has-cursor,
+  .has-cursor *:not(input):not(textarea):not(select) {
+    cursor: none;
+  }
+}
