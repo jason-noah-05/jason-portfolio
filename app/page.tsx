@@ -1,3 +1,4 @@
+import { About } from "@/components/about/about";
 import { CurrentChapter } from "@/components/chapter/current-chapter";
 import { Experiments } from "@/components/experiments/experiments";
 import { Hero } from "@/components/hero/hero";
@@ -18,6 +19,7 @@ export default function Home() {
       <AiLab />
       <Materials />
       <HowIWork />
+      <About />
       <RevealObserver />
     </main>
   );
