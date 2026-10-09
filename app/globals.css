@@ -76,6 +76,9 @@
   /* Delay added per staggered item inside a scroll reveal */
   --reveal-step: 90ms;
 
+  /* Extra scroll distance the hero stays pinned for, shared by its statements */
+  --hero-runway: 140svh;
+
   /* z-index layers */
   --z-base: 0;
   --z-content: 10;
@@ -323,6 +326,48 @@
     animation: line-up 800ms var(--ease-out-quint) var(--enter-delay, 0s) both;
   }
 
+  /* ---- Hero scroll statements ----
+     The hero section is a track and its stage is sticky. By default the track
+     is one stage tall, so nothing pins (no JavaScript, reduced motion, short
+     viewport). HeroStatement sets data-scrub="on" to add the runway.
+     Statements sit in one grid cell; .swap moves each line out of its clipped
+     .line wrapper. data-phase: active | before (left upwards) | after (not
+     yet arrived). data-motion="none" moves a statement without animating, for
+     statements skipped by a fast scroll. Transform and visibility only. */
+
+  [data-hero-track][data-scrub="on"] {
+    height: calc(100svh + var(--hero-runway));
+  }
+
+  .swap {
+    display: block;
+    transition:
+      transform var(--duration-slow) var(--ease-out-quint) calc(var(--i, 0) * 70ms),
+      visibility 0s linear calc(var(--duration-slow) + 100ms);
+  }
+
+  .hero-phrase[data-phase="active"] .swap {
+    transform: none;
+    visibility: visible;
+    transition:
+      transform var(--duration-slow) var(--ease-out-quint) calc(var(--i, 0) * 70ms + 120ms),
+      visibility 0s;
+  }
+
+  .hero-phrase[data-phase="before"] .swap {
+    transform: translateY(-105%);
+    visibility: hidden;
+  }
+
+  .hero-phrase[data-phase="after"] .swap {
+    transform: translateY(105%);
+    visibility: hidden;
+  }
+
+  .hero-phrase[data-motion="none"] .swap {
+    transition: none;
+  }
+
   /* ---- Scroll reveals ----
      Visible by default (no JavaScript, reduced motion, already in view).
      RevealObserver marks a [data-reveal] container data-state="hidden" while it
@@ -414,8 +459,10 @@
     transition: transform var(--duration-base) var(--ease-out-quint);
   }
 
+  /* aria-current is set by NavSpy for the section in view */
   .nav-link:hover::after,
-  .nav-link:focus-visible::after {
+  .nav-link:focus-visible::after,
+  .nav-link[aria-current="location"]::after {
     transform: scaleX(1);
   }
 
@@ -505,7 +552,9 @@
     letter-spacing: 0.06em;
   }
 
-  /* ---- Cursor (desktop, fine pointer, motion allowed) ---- */
+  /* ---- Cursor (desktop, fine pointer, motion allowed) ----
+     data-state: idle | interactive (dot grows) | native (dot hidden, the
+     native cursor shows over form fields). data-pressed shrinks the dot. */
 
   .cursor {
     position: fixed;
@@ -524,6 +573,10 @@
     opacity: 1;
   }
 
+  .cursor[data-visible="true"][data-state="native"] {
+    opacity: 0;
+  }
+
   .cursor__dot {
     display: block;
     width: 0.5rem;
@@ -536,6 +589,14 @@
 
   .cursor[data-state="interactive"] .cursor__dot {
     transform: scale(3);
+  }
+
+  .cursor[data-pressed="true"] .cursor__dot {
+    transform: scale(0.6);
+  }
+
+  .cursor[data-state="interactive"][data-pressed="true"] .cursor__dot {
+    transform: scale(2.2);
   }
 
   .cursor__label {

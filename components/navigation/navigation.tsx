@@ -2,6 +2,7 @@ import Link from "next/link";
 import { navigation } from "@/lib/data/navigation";
 import { site } from "@/lib/site";
 import { MobileMenu } from "./mobile-menu";
+import { NavSpy } from "./nav-spy";
 
 export function Navigation() {
   return (
@@ -25,6 +26,7 @@ export function Navigation() {
 
         <MobileMenu items={navigation} />
       </div>
+      <NavSpy />
     </header>
   );
 }
