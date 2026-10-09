@@ -18,6 +18,13 @@ export function MobileMenu({ items }: { items: readonly NavItem[] }) {
     const html = document.documentElement;
     const previousOverflow = html.style.overflow;
     html.style.overflow = "hidden";
+
+    // The overlay covers the page, so the page behind it must not be reachable
+    // by keyboard or screen reader either. The header (with the toggle button)
+    // sits outside <main>, so the menu stays operable.
+    const main = document.getElementById("main");
+    main?.setAttribute("inert", "");
+
     panel.current?.querySelector<HTMLElement>("a[href]")?.focus();
 
     const onKeyDown = (event: KeyboardEvent) => {
@@ -53,6 +60,7 @@ export function MobileMenu({ items }: { items: readonly NavItem[] }) {
 
     return () => {
       html.style.overflow = previousOverflow;
+      main?.removeAttribute("inert");
       document.removeEventListener("keydown", onKeyDown);
       desktop.removeEventListener("change", onBreakpoint);
     };

@@ -98,6 +98,11 @@
                               real text. On INK it is 5.4:1 and passes.
      WARNING #D9FF00   1.1:1  Only ever on INK. Never on PAPER.
    Use ink-muted for secondary text and signal-text for signal-coloured text.
+
+   CONTROL BOUNDARIES (WCAG 1.4.11 needs 3:1 where a border is the only thing
+   marking a form field). --rule-color is decorative and is only ~2.2:1 on
+   ink, so fields use --control-color: ink-muted on paper (5.4:1) and dust at
+   55% on ink (3.5:1).
    ========================================================================== */
 
 /* ==========================================================================
@@ -110,11 +115,13 @@
   :root {
     --tone-secondary: var(--color-ink-muted);
     --rule-color: var(--color-dust);
+    --control-color: var(--color-ink-muted);
   }
 
   [data-surface="ink"] {
     --tone-secondary: var(--color-dust);
     --rule-color: color-mix(in srgb, var(--color-dust) 35%, transparent);
+    --control-color: color-mix(in srgb, var(--color-dust) 55%, transparent);
   }
 
   html {

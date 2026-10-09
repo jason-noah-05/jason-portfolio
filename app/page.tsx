@@ -12,7 +12,9 @@ import { getSignal } from "@/lib/data/signals";
 
 export default function Home() {
   return (
-    <main id="main">
+    /* tabIndex -1 makes the skip link's target reliably focusable (Safari);
+       the outline is suppressed because focus here is programmatic only. */
+    <main id="main" tabIndex={-1} className="focus:outline-none">
       <Hero />
       <CurrentChapter />
       <Signal signal={getSignal("001")} />

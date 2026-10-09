@@ -11,8 +11,10 @@ const NO_ERRORS: FieldErrors = {};
 
 const LABEL = "type-meta block text-(--tone-secondary)";
 
+/* The underline is the only visible boundary of a field, so it uses
+   --control-color (3:1 or better), not the decorative --rule-color. */
 const INPUT =
-  "mt-3 block w-full rounded-none border-0 border-b border-(--rule-color) bg-transparent py-3 text-lead " +
+  "mt-3 block w-full rounded-none border-0 border-b border-(--control-color) bg-transparent py-3 text-lead " +
   "placeholder:text-(--tone-secondary) transition-colors duration-(--duration-fast) " +
   "hover:border-paper focus:border-paper aria-invalid:border-signal";
 
