@@ -7,16 +7,12 @@ import { site } from "@/lib/site";
 const stagger = (index: number) => ({ "--i": index }) as CSSProperties;
 
 /*
- * Ink surface, following the paper process section. Anchor id "about" is what
- * the navigation's About link targets. Three separate [data-reveal]
- * containers (statement, body, ledger); none is nested inside another.
- *
- * The "Real today / Not yet" ledger is the honesty device: filled marker =
- * real, hollow = not yet.
+ * Ink surface. Anchor id "about" is what the navigation's About link targets.
+ * Two separate [data-reveal] containers (statement, body); none nested.
+ * Part 6 replaces this with the zoom sequence.
  */
 export function About() {
   const last = about.statement.length - 1;
-  const columns = [about.ledger.real, about.ledger.notYet];
 
   return (
     <section id="about" aria-labelledby="about-title" data-surface="ink" className="bg-ink text-paper">
@@ -61,37 +57,6 @@ export function About() {
               </p>
             ))}
           </div>
-        </div>
-
-        <div data-reveal="group" className="relative mt-20 grid gap-x-6 gap-y-12 pt-8 md:mt-28 lg:grid-cols-12">
-          <span className="reveal-rule absolute inset-x-0 top-0 h-px bg-(--rule-color)" aria-hidden="true" />
-
-          {columns.map((column, columnIndex) => {
-            const real = columnIndex === 0;
-
-            return (
-              <div
-                key={column.label}
-                className={`reveal-fade lg:col-span-5 ${real ? "lg:col-start-1" : "lg:col-start-7"}`}
-                style={stagger(columnIndex)}
-              >
-                <h3 className="type-meta text-(--tone-secondary)">{column.label}</h3>
-                <ul className="mt-6">
-                  {column.items.map((item) => (
-                    <li key={item.text} className="flex gap-4 border-t border-(--rule-color) py-4 text-small">
-                      <span aria-hidden="true" className={real ? "text-signal" : "text-(--tone-secondary)"}>
-                        {real ? "●" : "○"}
-                      </span>
-                      <span>
-                        <span className="sr-only">{real ? "Real: " : "Not yet: "}</span>
-                        {item.text}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            );
-          })}
         </div>
       </div>
     </section>
