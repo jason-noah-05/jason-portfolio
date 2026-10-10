@@ -3,9 +3,10 @@ import { site } from "@/lib/site";
 import { HeroStatement } from "./hero-statement";
 
 /*
- * Entrance choreography (seconds), matching the brief:
- * meta .10 · name .20 · role .35 · statement .50 / .65 · instruction .80
- * Pure CSS: transform + opacity only, works with JavaScript disabled.
+ * Entrance choreography (seconds): meta .10 · name .20 · role .35 ·
+ * statement .50 / .65 · hint .80. Pure CSS, transform + opacity only, works
+ * with JavaScript disabled. On a first load the global intro curtain adds a
+ * short wait (see motion.css).
  *
  * Structure: the section is the scroll "track"; the stage inside it is sticky.
  * Without JavaScript the track is exactly one stage tall, so nothing pins.
@@ -34,7 +35,7 @@ export function Hero() {
         <div className="enter flex flex-col justify-between gap-2 type-meta text-ink-muted sm:flex-row" style={at(0.1)}>
           <p>{site.role}</p>
           <p>
-            {site.location} · {site.year}
+            {site.location}, {site.year}
           </p>
         </div>
 
@@ -60,12 +61,12 @@ export function Hero() {
         </div>
 
         <a
-          href="#current-chapter"
+          href="#work"
           className="enter group/hint type-meta inline-flex min-h-11 w-fit items-center gap-3 text-ink-muted"
           style={at(0.8)}
           data-cursor-label="Scroll"
         >
-          Scroll to investigate{" "}
+          See the work{" "}
           <span
             aria-hidden="true"
             className="transition-transform duration-(--duration-base) ease-(--ease-out-quint) group-hover/hint:translate-y-1"

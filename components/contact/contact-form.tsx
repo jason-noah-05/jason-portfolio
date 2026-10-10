@@ -16,16 +16,16 @@ const LABEL = "type-meta block text-(--tone-secondary)";
 const INPUT =
   "mt-3 block w-full rounded-none border-0 border-b border-(--control-color) bg-transparent py-3 text-lead " +
   "placeholder:text-(--tone-secondary) transition-colors duration-(--duration-fast) " +
-  "hover:border-paper focus:border-paper aria-invalid:border-signal";
+  "hover:border-ink focus:border-ink aria-invalid:border-signal-text";
 
 const BUTTON =
-  "type-meta inline-flex min-h-12 items-center gap-3 border border-paper px-6 transition-colors " +
+  "type-meta inline-flex min-h-12 items-center gap-3 border border-ink px-6 transition-colors " +
   "duration-(--duration-fast) disabled:opacity-40";
 
 function FieldError({ id, message }: { id: string; message: string | undefined }) {
   if (!message) return null;
   return (
-    <p id={id} className="text-small mt-2 text-signal">
+    <p id={id} className="text-small mt-2 text-signal-text">
       <span className="sr-only">Error: </span>
       {message}
     </p>
@@ -36,8 +36,8 @@ function FieldError({ id, message }: { id: string; message: string | undefined }
  * The contact form. Validation and delivery live in the server action, so the
  * form also works with JavaScript off. Inputs are controlled so a failed
  * submit never wipes what the visitor typed (React 19 resets uncontrolled
- * fields after an action). The topic is a native radio group: arrow keys work
- * and the choice changes the prompt, the placeholder and a one-line reply.
+ * fields after an action). The optional topic is a native radio group: arrow
+ * keys work, and the choice only changes the message label and placeholder.
  */
 export function ContactForm() {
   const [state, formAction, pending] = useActionState<ContactState, FormData>(
@@ -86,73 +86,47 @@ export function ContactForm() {
     <div data-reveal="group" className="relative pt-8">
       <span className="reveal-rule absolute inset-x-0 top-0 h-px bg-(--rule-color)" aria-hidden="true" />
 
-      <div className="reveal-fade">
+      <div className="reveal-fade lg:max-w-4xl">
         {sent ? (
-          <div className="grid gap-8 lg:grid-cols-12">
-            <div className="lg:col-span-8">
-              <h3 ref={successRef} tabIndex={-1} className="type-editorial">
-                Message <span className="italic">sent.</span>
-              </h3>
-              <p className="text-lead mt-6 max-w-xl">Thank you. It has gone through, and I&apos;ll reply by email.</p>
-              <button
-                type="button"
-                onClick={startAgain}
-                className={`${BUTTON} mt-10 hover:bg-paper hover:text-ink`}
-                data-cursor-label="Again"
-              >
-                Send another
-              </button>
-            </div>
+          <div>
+            <h3 ref={successRef} tabIndex={-1} className="type-editorial">
+              Message sent.
+            </h3>
+            <p className="text-lead mt-6 max-w-xl">Thanks. I&apos;ll reply by email.</p>
+            <button
+              type="button"
+              onClick={startAgain}
+              className={`${BUTTON} mt-10 hover:bg-ink hover:text-paper`}
+              data-cursor-label="Again"
+            >
+              Send another
+            </button>
           </div>
         ) : (
           <form ref={formRef} action={formAction} noValidate>
             <fieldset>
-              <legend className="type-meta mb-6 text-(--tone-secondary)">{contact.legend}</legend>
-
-              <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
-                {choices.map((item) => {
-                  const checked = item.id === choice;
-
-                  return (
-                    <label
-                      key={item.id}
-                      className="relative block cursor-pointer has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-4 has-[:focus-visible]:outline-paper"
-                    >
-                      <input
-                        type="radio"
-                        name="choice"
-                        value={item.id}
-                        checked={checked}
-                        onChange={() => setChoice(item.id)}
-                        className="peer sr-only"
-                      />
-                      <span
-                        data-checked={checked}
-                        className="group/tile flex h-full min-h-40 flex-col justify-between gap-8 border border-(--rule-color) p-4 transition-colors duration-(--duration-fast) hover:border-paper data-[checked=true]:border-paper data-[checked=true]:bg-paper data-[checked=true]:text-ink md:p-5"
-                      >
-                        <span className="type-meta flex items-center gap-3 text-(--tone-secondary) group-data-[checked=true]/tile:text-ink-muted">
-                          <span aria-hidden="true">{item.index}</span>
-                          <span
-                            aria-hidden="true"
-                            className={checked ? "text-signal-text" : undefined}
-                          >
-                            {checked ? "●" : "○"}
-                          </span>
-                        </span>
-                        <span className="text-lead uppercase tracking-wide">{item.label}</span>
-                      </span>
-                    </label>
-                  );
-                })}
+              <legend className="type-meta mb-4 text-(--tone-secondary)">{contact.legend}</legend>
+              <div className="flex flex-wrap gap-2">
+                {choices.map((item) => (
+                  <label key={item.id} className="relative cursor-pointer">
+                    <input
+                      type="radio"
+                      name="choice"
+                      value={item.id}
+                      checked={item.id === choice}
+                      onChange={() => setChoice(item.id)}
+                      className="peer sr-only"
+                    />
+                    <span className="type-meta inline-flex min-h-11 items-center border border-(--control-color) px-4 transition-colors duration-(--duration-fast) hover:border-ink peer-checked:border-ink peer-checked:bg-ink peer-checked:text-paper peer-focus-visible:outline-2 peer-focus-visible:outline-offset-4 peer-focus-visible:outline-ink">
+                      {item.label}
+                    </span>
+                  </label>
+                ))}
               </div>
             </fieldset>
 
-            <p aria-live="polite" className="text-lead mt-8 max-w-xl text-(--tone-secondary)">
-              {active ? active.reply : contact.noChoice}
-            </p>
-
-            <div className="mt-16 grid gap-x-6 gap-y-10 md:mt-20 lg:grid-cols-12">
-              <div className="lg:col-span-6">
+            <div className="mt-12 grid gap-x-6 gap-y-10 md:grid-cols-2">
+              <div>
                 <label htmlFor="contact-name" className={LABEL}>
                   Name
                 </label>
@@ -173,7 +147,7 @@ export function ContactForm() {
                 <FieldError id="contact-name-error" message={errors.name} />
               </div>
 
-              <div className="lg:col-span-6">
+              <div>
                 <label htmlFor="contact-email" className={LABEL}>
                   Email
                 </label>
@@ -194,7 +168,7 @@ export function ContactForm() {
                 <FieldError id="contact-email-error" message={errors.email} />
               </div>
 
-              <div className="lg:col-span-12">
+              <div className="md:col-span-2">
                 <label htmlFor="contact-message" className={LABEL}>
                   {active ? active.prompt : contact.defaultPrompt}
                 </label>
@@ -222,9 +196,9 @@ export function ContactForm() {
                 </label>
               </div>
 
-              <div className="flex flex-col gap-6 lg:col-span-12">
+              <div className="flex flex-col gap-6 md:col-span-2">
                 {formError ? (
-                  <div ref={alertRef} role="alert" tabIndex={-1} className="text-small max-w-prose text-signal">
+                  <div ref={alertRef} role="alert" tabIndex={-1} className="text-small max-w-prose text-signal-text">
                     <span className="sr-only">Error: </span>
                     {formError}
                   </div>
@@ -234,13 +208,13 @@ export function ContactForm() {
                   <button
                     type="submit"
                     disabled={pending}
-                    className={`${BUTTON} bg-paper text-ink hover:bg-transparent hover:text-paper`}
+                    className={`${BUTTON} bg-ink text-paper hover:bg-transparent hover:text-ink`}
                     data-cursor-label="Send"
                   >
                     {pending ? "Sending…" : "Send message"}
                     <span aria-hidden="true">↗</span>
                   </button>
-                  <p className="text-small text-(--tone-secondary)">All three fields are required.</p>
+                  <p className="text-small text-(--tone-secondary)">{contact.footnote}</p>
                 </div>
 
                 <span role="status" className="sr-only">

@@ -16,9 +16,9 @@ export function Navigation() {
           <ul className="flex gap-10">
             {navigation.map((item) => (
               <li key={item.href}>
-                <a href={item.href} className="nav-link">
+                <Link href={item.href} className="nav-link">
                   {item.label}
-                </a>
+                </Link>
               </li>
             ))}
           </ul>

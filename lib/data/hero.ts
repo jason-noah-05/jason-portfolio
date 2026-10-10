@@ -5,8 +5,8 @@
  * One entry per deliberate line break; the last line of each is italic.
  */
 export const heroStatements: readonly (readonly string[])[] = [
-  ["Building digital", "experiences."],
-  ["I make machines", "useful."],
-  ["I make ideas", "real."],
+  ["I build useful", "things with AI."],
+  ["Interfaces that", "make sense."],
+  ["Small experiments,", "finished properly."],
   ["What are you", "trying to build?"],
 ];

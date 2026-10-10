@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { CSSProperties } from "react";
 import type { NavItem } from "@/lib/data/navigation";
@@ -92,7 +93,7 @@ export function MobileMenu({ items }: { items: readonly NavItem[] }) {
           <ul>
             {items.map((item, index) => (
               <li key={item.href}>
-                <a
+                <Link
                   href={item.href}
                   className="menu-link"
                   onClick={close}
@@ -102,7 +103,7 @@ export function MobileMenu({ items }: { items: readonly NavItem[] }) {
                     {String(index + 1).padStart(2, "0")}
                   </span>
                   {item.label}
-                </a>
+                </Link>
               </li>
             ))}
           </ul>

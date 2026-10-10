@@ -1,67 +1,113 @@
-export type ExperimentStatus = "placeholder" | "building" | "shipped";
+export type ExperimentSlug =
+  | "generative-ui"
+  | "rough-to-refined"
+  | "image-to-interface"
+  | "creative-coding";
 
 export type Experiment = {
-  readonly id: string;
+  readonly slug: ExperimentSlug;
   readonly title: string;
-  /** The question being explored. Never state results that do not exist. */
-  readonly description: string;
-  readonly stack: readonly string[];
+  /** One plain sentence. Used on the work index and as the page description. */
+  readonly summary: string;
+  /** Short category shown on the index. */
+  readonly kind: string;
+  /** Opening line on the project page: what to do with the demo. */
+  readonly intro: string;
+  /** Why it exists. One short paragraph. */
+  readonly idea: string;
+  /** How it is built. Only things that are true of the code. */
+  readonly how: readonly string[];
+  readonly tech: readonly string[];
   readonly year: number;
-  readonly status: ExperimentStatus;
-  /** What the experiment is made of, revealed by the deconstruction interaction. */
-  readonly layers: readonly string[];
+  readonly status: string;
 };
 
-export const statusLabels: Record<ExperimentStatus, string> = {
-  placeholder: "Placeholder",
-  building: "In progress",
-  shipped: "Shipped",
-};
+export const work = {
+  label: "Experiments",
+  intro: "Four small experiments you can try. They're sketches, not client work.",
+} as const;
 
-/**
- * Every entry is a placeholder until a real experiment replaces it.
- * Replace an entry in place (keep its id) and update its status honestly.
- * Add new experiments at the end; ids are never reused.
- */
+/** Add new experiments at the end. Slugs are never reused. */
 export const experiments: readonly Experiment[] = [
   {
-    id: "001",
-    title: "Natural language → website",
-    description:
-      "Can a plain-language brief become a complete web experience that still has a point of view?",
-    stack: ["AI", "Next.js", "TypeScript"],
+    slug: "generative-ui",
+    title: "Generative UI",
+    summary: "Pick what a visitor wants to do and watch the layout change to fit.",
+    kind: "Interface",
+    intro: "Pick what you want to do. The layout rearranges to suit it.",
+    idea: "Most pages show everyone the same layout. But reading an article, comparing options and making a decision are different jobs, and each works better with a different layout. This sketch shows that idea on a small scale.",
+    how: [
+      "Each layout is six rectangles with a position, a size and a weight.",
+      "Switching intent moves the same six rectangles, so they glide into place instead of being swapped.",
+      "The layouts are drawn by hand. Nothing is generated yet.",
+    ],
+    tech: ["React", "TypeScript", "SVG"],
     year: 2026,
-    status: "placeholder",
-    layers: ["Language", "Model", "Components", "Interface"],
+    status: "Working demo",
   },
   {
-    id: "002",
-    title: "AI automation",
-    description:
-      "Where does automating a small, repetitive workflow with a model stop saving time and start costing trust?",
-    stack: ["Python", "LLMs", "TypeScript"],
+    slug: "rough-to-refined",
+    title: "Rough to refined",
+    summary: "Scroll to watch one rough sketch turn into a finished page.",
+    kind: "Scroll story",
+    intro: "Scroll down. A rough sketch gets structure, then polish, then colour.",
+    idea: "A finished design hides every decision that led to it. I wanted to show the stages instead. It's the same page each time, with the same content. Only the care changes.",
+    how: [
+      "Four layers of the same page sit in one SVG: sketch, structure, type and colour.",
+      "Your scroll position sets a single number from 0 to 3, and each layer fades in or out as it passes.",
+      "On small screens, or with reduced motion, the four stages are shown as a plain list.",
+    ],
+    tech: ["React", "TypeScript", "SVG", "CSS"],
     year: 2026,
-    status: "placeholder",
-    layers: ["AI", "Logic", "Data", "Interface"],
+    status: "Working demo",
   },
   {
-    id: "003",
-    title: "Image → interface",
-    description:
-      "How much of a screen's structure can be recovered from a picture of it, and what has to stay human?",
-    stack: ["Vision", "TypeScript", "Figma"],
+    slug: "image-to-interface",
+    title: "Image to interface",
+    summary: "Step through how a drawn wireframe could be read, one pass at a time.",
+    kind: "Vision",
+    intro: "Move the slider through four passes, from marks on a canvas to markup.",
+    idea: "A sketch carries more structure than it looks like it does: where things sit, what is big, what belongs together. This shows the steps a tool could take to read it.",
+    how: [
+      "The wireframe is drawn by hand. No image is being analysed.",
+      "Each pass adds a layer on top: outlines first, then names, then markup.",
+      "The markup at the end is written out ahead of time.",
+    ],
+    tech: ["React", "TypeScript", "SVG"],
     year: 2026,
-    status: "placeholder",
-    layers: ["Pixels", "Structure", "Components", "Code"],
+    status: "Working demo",
   },
   {
-    id: "004",
-    title: "Creative code study",
-    description:
-      "A small generative piece built from one rule and a lot of restraint, made to be looked at rather than explained.",
-    stack: ["Canvas", "SVG", "TypeScript"],
+    slug: "creative-coding",
+    title: "Creative coding",
+    summary: "A grid of small lines that turn to follow your pointer.",
+    kind: "Creative code",
+    intro: "Move your pointer over the field, then switch the rule.",
+    idea: "One simple rule, repeated many times, can look surprisingly alive. Each line only knows where the target is. Everything you see comes from that.",
+    how: [
+      "The canvas holds a grid of short lines, each with its own angle.",
+      "Every frame, each line turns a little towards the angle the current rule asks for.",
+      "The loop stops when nothing is moving, so an idle field uses no processing.",
+    ],
+    tech: ["Canvas 2D", "TypeScript"],
     year: 2026,
-    status: "placeholder",
-    layers: ["Rule", "Motion", "Noise", "Form"],
+    status: "Working demo",
   },
 ];
+
+export function getExperiment(slug: string): Experiment | undefined {
+  return experiments.find((experiment) => experiment.slug === slug);
+}
+
+/** The next experiments in order, wrapping around. Never includes the current one. */
+export function relatedExperiments(slug: string, count = 2): readonly Experiment[] {
+  const index = experiments.findIndex((experiment) => experiment.slug === slug);
+  if (index === -1) return [];
+
+  const others: Experiment[] = [];
+  for (let step = 1; step < experiments.length && others.length < count; step++) {
+    const next = experiments[(index + step) % experiments.length];
+    if (next) others.push(next);
+  }
+  return others;
+}

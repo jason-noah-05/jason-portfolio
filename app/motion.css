@@ -1,0 +1,215 @@
+/*
+ * Motion additions. Imported after globals.css, so these plain rules sit on
+ * top of the Tailwind layers. Everything here uses the tokens from globals.css
+ * (durations, easings) plus the distance tokens below. Transform, opacity and
+ * clip-path only. The global reduced-motion rule in globals.css collapses every
+ * animation and transition defined here.
+ *
+ * Patterns, each used for one job:
+ *   intro        curtain that lifts once, then hands over to the hero
+ *   reveal-clip  a picture wiped in from the top (work previews)
+ *   swap-in      small settle when a panel's text changes (Materials, scroll story)
+ *   text-link    underlined link that changes colour on hover (never hover-only)
+ *   rr-*         the rough-to-refined scene, driven by one number, --p (0 to 3)
+ */
+
+:root {
+  --distance-sm: 0.5rem;
+  --distance-md: 1.5rem;
+  --distance-lg: 3rem;
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+}
+
+/* ---- Intro ----
+   Pure CSS, so it cannot cause a hydration mismatch and cannot trap anyone:
+   it ignores the pointer and is gone after about 1.5s. While <html> has
+   data-intro, the hero entrance waits for the curtain. The Intro component
+   removes the attribute once everything has finished. */
+
+html[data-intro] {
+  --intro-offset: 0.8s;
+}
+
+html[data-intro] .enter,
+html[data-intro] .fade-in,
+html[data-intro] .line__inner {
+  animation-delay: calc(var(--enter-delay, 0s) + var(--intro-offset));
+}
+
+.intro {
+  position: fixed;
+  inset: 0;
+  z-index: calc(var(--z-skip) + 1);
+  display: grid;
+  place-items: center;
+  background-color: var(--color-ink);
+  color: var(--color-paper);
+  pointer-events: none;
+  animation: intro-out 800ms var(--ease-in-out-quart) 700ms both;
+}
+
+.intro__mark {
+  display: block;
+  font-family: var(--font-display);
+  font-size: var(--text-title);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  animation: line-up 700ms var(--ease-out-quint) 100ms both;
+}
+
+.intro__bar {
+  position: absolute;
+  right: var(--gutter);
+  bottom: var(--gutter);
+  left: var(--gutter);
+  height: 1px;
+  background-color: var(--color-dust);
+  transform-origin: left;
+  animation: intro-bar 600ms var(--ease-in-out-quart) 100ms both;
+}
+
+@keyframes intro-out {
+  from {
+    clip-path: inset(0);
+    visibility: visible;
+  }
+  to {
+    clip-path: inset(0 0 100% 0);
+    visibility: hidden;
+  }
+}
+
+@keyframes intro-bar {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* ---- Picture wipe (inside a [data-reveal] container) ---- */
+
+.reveal-clip {
+  display: block;
+  clip-path: inset(0);
+}
+
+[data-reveal][data-state="hidden"] .reveal-clip {
+  clip-path: inset(0 0 100% 0);
+}
+
+[data-reveal][data-state="shown"] .reveal-clip {
+  transition: clip-path var(--duration-reveal) var(--ease-in-out-quart);
+}
+
+/* ---- Panel settle ---- */
+
+.swap-in {
+  animation: swap-in var(--duration-base) var(--ease-out-quint) both;
+}
+
+@keyframes swap-in {
+  from {
+    opacity: 0;
+    transform: translateY(var(--distance-sm));
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ---- Type and links ---- */
+
+.project-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.75rem, 1.1rem + 2.2vw, 3.25rem);
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.text-link {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.25em;
+  text-decoration-color: currentColor;
+  transition: text-decoration-color var(--duration-fast) linear;
+}
+
+.text-link:hover {
+  text-decoration-color: var(--color-signal-text);
+}
+
+/* ---- Rough to refined ----
+   One scene, four layers. --p runs from 0 (rough) to 3 (final). Each layer is
+   visible for part of that range. --s1..--s3 are the three transitions as
+   numbers from 0 to 1. With no --p set the scene shows the rough sketch. */
+
+.rr-scene {
+  --s1: clamp(0, var(--p, 0), 1);
+  --s2: clamp(0, calc(var(--p, 0) - 1), 1);
+  --s3: clamp(0, calc(var(--p, 0) - 2), 1);
+}
+
+.rr-rough {
+  opacity: calc(1 - var(--s1));
+  transform-origin: 80px 50px;
+  transform: rotate(calc((1 - var(--s1)) * -1.6deg));
+}
+
+.rr-structure {
+  opacity: calc(var(--s1) * (1 - var(--s2)));
+}
+
+.rr-refine {
+  opacity: var(--s2);
+}
+
+.rr-final {
+  opacity: var(--s3);
+}
+
+.rr-bar {
+  display: block;
+  height: 1px;
+  background-color: var(--color-signal);
+  transform-origin: left;
+  transform: scaleX(calc(var(--p, 0) / 3));
+}
+
+.rr-frame {
+  width: min(100%, calc((100svh - var(--nav-height) - 3rem) * 1.6));
+}
+
+/* Plain list by default (phones, reduced motion, short screens, no script).
+   The pinned scroll version only shows when it can work well. */
+
+.rr-scroll {
+  display: none;
+  height: calc(100svh - var(--nav-height) + 320svh);
+}
+
+.rr-stage {
+  position: sticky;
+  top: var(--nav-height);
+  display: grid;
+  height: calc(100svh - var(--nav-height));
+  align-content: center;
+}
+
+.rr-steps {
+  display: grid;
+  gap: 4rem;
+}
+
+@media (min-width: 48rem) and (min-height: 600px) and (prefers-reduced-motion: no-preference) {
+  .rr-scroll {
+    display: block;
+  }
+
+  .rr-steps {
+    display: none;
+  }
+}

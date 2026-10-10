@@ -1,53 +1,20 @@
 export type ProcessStage = {
   readonly index: string;
   readonly name: string;
-  /** The question that stage is trying to answer. */
-  readonly question: string;
   readonly description: string;
 };
 
 /** Describes how the work is intended to run. Never a claim about past projects. */
 export const howIWork = {
-  label: "How I Work",
-  statement: "How I intend to work: five stages, usually in this order, often revisited.",
-  status: "A loop, not a line",
-  disclosure:
-    "The stages rarely run in a straight line. Refining sends me back to building, and building sends me back to understanding. This describes how I intend to work, not a record of projects delivered.",
+  label: "How I work",
+  statement: "Five steps, in roughly this order. I go back and forth more than a list makes it look.",
+  note: "This is how I plan to work, not a record of past projects.",
 } as const;
 
 export const stages: readonly ProcessStage[] = [
-  {
-    index: "01",
-    name: "Understand",
-    question: "What is the problem underneath the request?",
-    description:
-      "Before anything is built, I want to know what the problem is, who it belongs to and what a good result would look like.",
-  },
-  {
-    index: "02",
-    name: "Explore",
-    question: "What could work, and what rules it out?",
-    description:
-      "Research the options, the constraints and the ways it could go wrong. A small throwaway prototype beats a long argument.",
-  },
-  {
-    index: "03",
-    name: "Build",
-    question: "What is the simplest version that is actually right?",
-    description:
-      "Design and engineering happen together, so the interface and the system behind it shape each other.",
-  },
-  {
-    index: "04",
-    name: "Refine",
-    question: "What can be taken away?",
-    description: "Test it, remove what isn't earning its place, and polish what is left.",
-  },
-  {
-    index: "05",
-    name: "Ship",
-    question: "Is it finished enough to be useful?",
-    description:
-      "Put it in front of the people it was made for, and be honest about what it does and doesn't do.",
-  },
+  { index: "01", name: "Understand", description: "Work out what the problem actually is and who has it." },
+  { index: "02", name: "Explore", description: "Try a few options. A quick throwaway prototype beats a long discussion." },
+  { index: "03", name: "Build", description: "Design and code together, so each one shapes the other." },
+  { index: "04", name: "Refine", description: "Test it, cut what isn't needed and polish what's left." },
+  { index: "05", name: "Ship", description: "Put it in front of the people it's for, and say plainly what it does and doesn't do." },
 ];

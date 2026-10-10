@@ -2,9 +2,12 @@ import type { Metadata, Viewport } from "next";
 import { Hanken_Grotesk, Instrument_Serif, JetBrains_Mono } from "next/font/google";
 import { Navigation } from "@/components/navigation/navigation";
 import { Cursor } from "@/components/ui/cursor";
+import { Footer } from "@/components/ui/footer";
+import { Intro } from "@/components/ui/intro";
 import { SkipLink } from "@/components/ui/skip-link";
 import { site } from "@/lib/site";
 import "./globals.css";
+import "./motion.css";
 
 /*
  * Font roles. Canela, ABC Diatype and Berkeley Mono are commercial and are not
@@ -77,13 +80,19 @@ const structuredData = {
   ...(site.url ? { url: site.url } : {}),
 };
 
+/*
+ * data-intro on <html> delays the hero entrance until the curtain has lifted.
+ * The Intro component clears it afterwards, so later navigation is not delayed.
+ */
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${display.variable} ${sans.variable} ${mono.variable}`}>
+    <html lang="en" data-intro="on" className={`${display.variable} ${sans.variable} ${mono.variable}`}>
       <body>
         <SkipLink />
+        <Intro />
         <Navigation />
         {children}
+        <Footer />
         <Cursor />
         <script
           type="application/ld+json"
